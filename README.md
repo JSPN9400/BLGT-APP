@@ -1,5 +1,7 @@
 # BLGT-APP
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/JSPN9400/BLGT-APP)
+
 Production-ready MVP for a local business lead management SaaS built with FastAPI, PostgreSQL, React, TailwindCSS, JWT auth, and Docker.
 
 ## Features
