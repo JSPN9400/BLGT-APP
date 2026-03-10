@@ -60,6 +60,17 @@ copy .env.example .env
 npm run dev
 ```
 
+## Deploy frontend to GitHub Pages
+
+The repo includes a GitHub Actions workflow at `.github/workflows/pages.yml` that publishes the Vite frontend from `frontend/`.
+
+1. Push to `main`.
+2. In GitHub, open `Settings > Pages` and set `Source` to `GitHub Actions`.
+3. Optionally add a repository variable named `VITE_API_BASE_URL` if your backend is hosted elsewhere.
+
+- GitHub Pages only hosts the frontend.
+- The FastAPI backend will still need a separate host if you want login, leads, and follow-up actions to work.
+
 ## API endpoints
 
 - `POST /api/auth/signup`
