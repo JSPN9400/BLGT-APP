@@ -3,6 +3,7 @@ backend/.venv/
 backend/__pycache__/
 backend/**/*.pyc
 backend/**/__pycache__/
+backend/app/static/
 backend/lead_management.db
 backend/*.log
 frontend/.env

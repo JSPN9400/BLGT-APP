@@ -74,6 +74,25 @@ The repo includes a GitHub Actions workflow at `.github/workflows/pages.yml` tha
 - Each client sees and edits their own local demo data in their own browser.
 - If you want shared real data, authentication, and multi-user access, the backend will still need a separate host.
 
+## Deploy as a real web app
+
+If you want one actual web app URL instead of a GitHub Pages demo, use the root `Dockerfile`.
+
+- The container builds the React frontend and serves it from FastAPI.
+- Clients open one URL and the API is available from the same host.
+- `render.yaml` is included for a simple Render deploy.
+- This setup uses SQLite by default, which is acceptable for temporary testing but not reliable permanent storage on free hosts because container filesystems are often ephemeral.
+
+Typical free deploy path:
+
+1. Push this repo to GitHub.
+2. Create a new Web Service on Render.
+3. Point it at this repository root.
+4. Use the included `render.yaml` or select `Docker`.
+5. After deploy, open the service URL.
+
+For temporary client review, this is the closest option to a real web app without buying infrastructure.
+
 ## API endpoints
 
 - `POST /api/auth/signup`

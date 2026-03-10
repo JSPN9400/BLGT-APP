@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: blgt-app
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        value: sqlite:///./lead_management.db
+      - key: CORS_ORIGINS
+        value: "*"
