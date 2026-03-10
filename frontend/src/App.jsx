@@ -414,6 +414,11 @@ export default function App() {
                 <p className="text-xs uppercase tracking-[0.36em] text-cyan-100/65">{activePage.eyebrow}</p>
                 <h2 className="mt-3 font-display text-4xl leading-tight text-sand md:text-5xl">{activePage.title}</h2>
                 <p className="mt-4 text-base text-slate-300">{activePage.description}</p>
+                {api.isDemoMode ? (
+                  <div className="mt-4 inline-flex rounded-full border border-amber-300/25 bg-amber-400/10 px-4 py-2 text-sm font-medium text-amber-100">
+                    Demo mode on GitHub Pages. Data is stored in this browser only.
+                  </div>
+                ) : null}
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2 xl:hidden">

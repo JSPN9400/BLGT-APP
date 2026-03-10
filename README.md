@@ -66,10 +66,13 @@ The repo includes a GitHub Actions workflow at `.github/workflows/pages.yml` tha
 
 1. Push to `main`.
 2. In GitHub, open `Settings > Pages` and set `Source` to `GitHub Actions`.
-3. Optionally add a repository variable named `VITE_API_BASE_URL` if your backend is hosted elsewhere.
+3. The current workflow builds in demo mode, so it works without any backend or paid hosting.
+4. Optionally add a repository variable named `VITE_API_BASE_URL` later if you host the backend elsewhere and want live API calls instead of demo data.
 
 - GitHub Pages only hosts the frontend.
-- The FastAPI backend will still need a separate host if you want login, leads, and follow-up actions to work.
+- The deployed Pages site currently uses browser `localStorage` as a temporary demo database.
+- Each client sees and edits their own local demo data in their own browser.
+- If you want shared real data, authentication, and multi-user access, the backend will still need a separate host.
 
 ## API endpoints
 
