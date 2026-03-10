@@ -3,6 +3,10 @@ function getStatusClasses(status) {
     return "border-emerald-300/25 bg-emerald-400/10 text-emerald-100";
   }
 
+  if (status === "Lost") {
+    return "border-red-300/25 bg-red-400/10 text-red-100";
+  }
+
   if (status === "Contacted") {
     return "border-cyan-300/25 bg-cyan-400/10 text-cyan-100";
   }
@@ -10,7 +14,37 @@ function getStatusClasses(status) {
   return "border-orange-300/25 bg-orange-400/10 text-orange-100";
 }
 
-export function LeadTable({ leads, onEdit, onDelete, upgradeRequired }) {
+function getPriorityClasses(priority) {
+  if (priority === "High") {
+    return "border-red-300/25 bg-red-400/10 text-red-100";
+  }
+
+  if (priority === "Low") {
+    return "border-slate-300/20 bg-slate-400/10 text-slate-100";
+  }
+
+  return "border-yellow-300/25 bg-yellow-400/10 text-yellow-100";
+}
+
+function formatDate(value) {
+  if (!value) {
+    return "No update";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(date);
+}
+
+export function LeadTable({ leads, onEdit, onDelete, onTrack, selectedLeadId, upgradeRequired }) {
   return (
     <div className="surface-card overflow-hidden">
       <div className="flex flex-col gap-3 border-b border-white/10 px-5 py-5 md:flex-row md:items-end md:justify-between">
@@ -27,11 +61,10 @@ export function LeadTable({ leads, onEdit, onDelete, upgradeRequired }) {
         <table className="min-w-full text-left text-sm">
           <thead className="bg-white/5 text-slate-200">
             <tr>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Phone</th>
-              <th className="px-4 py-3">Interest</th>
-              <th className="px-4 py-3">Source</th>
-              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Lead</th>
+              <th className="px-4 py-3">Contact</th>
+              <th className="px-4 py-3">Pipeline</th>
+              <th className="px-4 py-3">Feedback</th>
               <th className="px-4 py-3">Actions</th>
             </tr>
           </thead>
@@ -47,16 +80,33 @@ export function LeadTable({ leads, onEdit, onDelete, upgradeRequired }) {
               <tr className="border-t border-white/10 transition hover:bg-white/[0.03]" key={lead.id}>
                 <td className="px-4 py-3">
                   <p className="font-semibold text-white">{lead.name}</p>
-                  <p className="text-xs text-slate-400">{lead.email || "No email"}</p>
+                  <p className="text-xs text-slate-400">{lead.company_name || lead.email || "No company"}</p>
                 </td>
-                <td className="px-4 py-3 text-slate-200">{lead.phone}</td>
-                <td className="px-4 py-3 text-slate-200">{lead.service_interest}</td>
-                <td className="px-4 py-3 text-slate-200">{lead.lead_source}</td>
                 <td className="px-4 py-3">
-                  <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${getStatusClasses(lead.status)}`}>{lead.status}</span>
+                  <p className="text-slate-200">{lead.phone}</p>
+                  <p className="text-xs text-slate-400">{lead.city || lead.email || "No email"}</p>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-wrap gap-2">
+                    <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${getStatusClasses(lead.status)}`}>{lead.status}</span>
+                    <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${getPriorityClasses(lead.priority)}`}>{lead.priority}</span>
+                  </div>
+                  <p className="mt-2 text-xs text-slate-300">{lead.service_interest}</p>
+                  <p className="mt-1 text-xs text-slate-400">Assigned: {lead.assigned_to || "Unassigned"} • Last touch: {formatDate(lead.last_contacted_at)}</p>
+                </td>
+                <td className="px-4 py-3">
+                  <p className="text-slate-200">{lead.client_feedback || "No feedback yet"}</p>
+                  <p className="mt-1 text-xs text-slate-400">{lead.next_step || "No next step recorded"}</p>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-3">
+                    <button
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${selectedLeadId === lead.id ? "border-cyan-300/30 bg-cyan-400/10 text-cyan-100" : "border-white/10 text-white hover:bg-white/10"}`}
+                      onClick={() => onTrack(lead)}
+                      type="button"
+                    >
+                      Track
+                    </button>
                     <button className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white transition hover:bg-white/10" onClick={() => onEdit(lead)} type="button">
                       Edit
                     </button>

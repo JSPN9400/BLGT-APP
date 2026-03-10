@@ -6,11 +6,10 @@ from fastapi.responses import FileResponse
 
 from app.api.routes import auth, dashboard, followups, leads
 from app.core.config import settings
-from app.core.database import Base, engine
-from app.models import FollowUp, Lead, Subscription, User
+from app.core.database import ensure_runtime_schema
+from app.models import FollowUp, Lead, LeadInteraction, Subscription, User
 
-
-Base.metadata.create_all(bind=engine)
+ensure_runtime_schema()
 
 app = FastAPI(title=settings.app_name)
 

@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.core.database import get_db
-from app.schemas.lead import LeadCreate, LeadResponse, LeadUpdate
-from app.services.leads import create_lead, delete_lead, get_lead_or_404, list_leads, update_lead
+from app.schemas.lead import LeadCreate, LeadInteractionCreate, LeadResponse, LeadUpdate
+from app.services.leads import add_interaction, create_lead, delete_lead, get_lead_or_404, list_leads, update_lead
 
 
 router = APIRouter(prefix="/leads", tags=["leads"])
@@ -28,6 +28,11 @@ def get_lead(lead_id: int, db: Session = Depends(get_db), current_user=Depends(g
 @router.put("/{lead_id}", response_model=LeadResponse)
 def edit_lead(lead_id: int, payload: LeadUpdate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     return update_lead(db, current_user, lead_id, payload)
+
+
+@router.post("/{lead_id}/interactions", response_model=LeadResponse, status_code=status.HTTP_201_CREATED)
+def create_lead_interaction(lead_id: int, payload: LeadInteractionCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    return add_interaction(db, current_user, lead_id, payload)
 
 
 @router.delete("/{lead_id}", status_code=status.HTTP_204_NO_CONTENT)

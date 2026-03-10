@@ -4,6 +4,7 @@ import { AuthForm } from "./components/AuthForm";
 import { FollowUpList } from "./components/FollowUpList";
 import { LeadForm } from "./components/LeadForm";
 import { LeadTable } from "./components/LeadTable";
+import { LeadTrackerPanel } from "./components/LeadTrackerPanel";
 import { StatCard } from "./components/StatCard";
 import { SubscriptionUpgrade } from "./components/SubscriptionUpgrade";
 import { api } from "./lib/api";
@@ -76,9 +77,11 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(false);
   const [appLoading, setAppLoading] = useState(false);
   const [savingLead, setSavingLead] = useState(false);
+  const [savingInteraction, setSavingInteraction] = useState(false);
   const [completingFollowUpId, setCompletingFollowUpId] = useState(null);
   const [error, setError] = useState("");
   const [editingLead, setEditingLead] = useState(null);
+  const [selectedLeadId, setSelectedLeadId] = useState(null);
   const leadFormRef = useRef(null);
 
   async function loadAppData({ preserveSession = false } = {}) {
@@ -99,6 +102,7 @@ export default function App() {
       setStats(statsData);
       setLeads(leadsData);
       setFollowUps(followUpData);
+      setSelectedLeadId((current) => current ?? leadsData[0]?.id ?? null);
     } catch (err) {
       setError(err.message);
       if (!preserveSession) {
@@ -160,6 +164,9 @@ export default function App() {
   async function handleLeadDelete(id) {
     try {
       await api.deleteLead(id);
+      if (selectedLeadId === id) {
+        setSelectedLeadId(null);
+      }
       await loadAppData({ preserveSession: true });
     } catch (err) {
       setError(err.message);
@@ -179,6 +186,24 @@ export default function App() {
     }
   }
 
+  async function handleAddInteraction(leadId, form) {
+    setSavingInteraction(true);
+    setError("");
+
+    try {
+      await api.addLeadInteraction(leadId, {
+        ...form,
+        contacted_at: form.contacted_at ? new Date(form.contacted_at).toISOString() : null
+      });
+      setSelectedLeadId(leadId);
+      await loadAppData({ preserveSession: true });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSavingInteraction(false);
+    }
+  }
+
   function focusLeadForm() {
     setEditingLead(null);
     setCurrentPage("add-lead");
@@ -189,10 +214,15 @@ export default function App() {
 
   function handleLeadEdit(lead) {
     setEditingLead(lead);
+    setSelectedLeadId(lead.id);
     setCurrentPage("add-lead");
     requestAnimationFrame(() => {
       leadFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
+  }
+
+  function handleTrackLead(lead) {
+    setSelectedLeadId(lead.id);
   }
 
   function logout() {
@@ -213,6 +243,7 @@ export default function App() {
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard hint="fresh enquiries recorded since midnight" label="Leads today" value={stats?.leads_today ?? 0} />
           <StatCard hint={stats?.is_free_plan ? `Free plan limit: ${stats?.max_leads ?? 0}` : "Unlimited lead storage on Pro"} label="Total pipeline" value={stats?.total_leads ?? 0} />
+          <StatCard hint="leads already contacted and moved forward" label="Contacted" value={stats?.contacted_leads ?? 0} />
           <StatCard hint="callbacks and check-ins due today" label="Follow-ups due" value={stats?.followups_due_today ?? 0} />
           <div className="surface-card flex flex-col justify-between p-5">
             <div>
@@ -245,16 +276,23 @@ export default function App() {
               </div>
               <div className="rounded-[26px] border border-white/10 bg-white/[0.04] p-4">
                 <p className="text-sm text-slate-400">Contacted</p>
-                <p className="mt-2 text-3xl font-semibold text-white">{leads.filter((lead) => lead.status === "Contacted").length}</p>
+                <p className="mt-2 text-3xl font-semibold text-white">{stats?.contacted_leads ?? leads.filter((lead) => lead.status === "Contacted").length}</p>
               </div>
               <div className="rounded-[26px] border border-white/10 bg-white/[0.04] p-4">
                 <p className="text-sm text-slate-400">Converted</p>
-                <p className="mt-2 text-3xl font-semibold text-white">{leads.filter((lead) => lead.status === "Converted").length}</p>
+                <p className="mt-2 text-3xl font-semibold text-white">{stats?.converted_leads ?? leads.filter((lead) => lead.status === "Converted").length}</p>
               </div>
             </div>
 
             <div className="mt-6">
-              <LeadTable leads={leads.slice(0, 5)} onDelete={handleLeadDelete} onEdit={handleLeadEdit} upgradeRequired={stats?.upgrade_required} />
+              <LeadTable
+                leads={leads.slice(0, 5)}
+                onDelete={handleLeadDelete}
+                onEdit={handleLeadEdit}
+                onTrack={handleTrackLead}
+                selectedLeadId={selectedLeadId}
+                upgradeRequired={stats?.upgrade_required}
+              />
             </div>
           </div>
 
@@ -305,7 +343,21 @@ export default function App() {
     }
 
     if (currentPage === "leads") {
-      return <LeadTable leads={leads} onDelete={handleLeadDelete} onEdit={handleLeadEdit} upgradeRequired={stats?.upgrade_required} />;
+      const selectedLead = leads.find((lead) => lead.id === selectedLeadId) ?? null;
+
+      return (
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_420px]">
+          <LeadTable
+            leads={leads}
+            onDelete={handleLeadDelete}
+            onEdit={handleLeadEdit}
+            onTrack={handleTrackLead}
+            selectedLeadId={selectedLeadId}
+            upgradeRequired={stats?.upgrade_required}
+          />
+          <LeadTrackerPanel lead={selectedLead} onAddInteraction={handleAddInteraction} saving={savingInteraction} />
+        </div>
+      );
     }
 
     if (currentPage === "followups") {

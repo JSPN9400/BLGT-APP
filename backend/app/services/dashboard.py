@@ -4,7 +4,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.followup import FollowUp
-from app.models.lead import Lead
+from app.models.lead import Lead, LeadStatus
 from app.models.user import User
 from app.schemas.dashboard import DashboardStats
 from app.services.subscriptions import FREE_PLAN_LIMIT, get_or_create_subscription, is_free_plan
@@ -26,11 +26,25 @@ def get_dashboard_stats(db: Session, user: User) -> DashboardStats:
         .scalar()
         or 0
     )
+    contacted_leads = (
+        db.query(func.count(Lead.id))
+        .filter(Lead.user_id == user.id, Lead.status == LeadStatus.CONTACTED)
+        .scalar()
+        or 0
+    )
+    converted_leads = (
+        db.query(func.count(Lead.id))
+        .filter(Lead.user_id == user.id, Lead.status == LeadStatus.CONVERTED)
+        .scalar()
+        or 0
+    )
     free = is_free_plan(subscription)
     return DashboardStats(
         leads_today=leads_today,
         total_leads=total_leads,
         followups_due_today=followups_due_today,
+        contacted_leads=contacted_leads,
+        converted_leads=converted_leads,
         max_leads=FREE_PLAN_LIMIT if free else None,
         is_free_plan=free,
         show_ads=free,
