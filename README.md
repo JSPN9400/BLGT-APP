@@ -80,4 +80,5 @@ npm run dev
 
 - The API enforces the Free plan lead limit, not just the frontend.
 - Pro users have unlimited leads, no ads, and a company logo slot on the dashboard.
+- Local development now defaults to SQLite in `backend/.env.example` so the API can run without PostgreSQL. Docker still uses PostgreSQL.
 - `Base.metadata.create_all(...)` is used for MVP bootstrapping. Add Alembic migrations before a real production rollout.

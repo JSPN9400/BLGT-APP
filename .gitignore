@@ -1,0 +1,11 @@
+backend/.env
+backend/.venv/
+backend/__pycache__/
+backend/**/*.pyc
+backend/**/__pycache__/
+backend/lead_management.db
+backend/*.log
+frontend/.env
+frontend/node_modules/
+frontend/dist/
+frontend/*.log
