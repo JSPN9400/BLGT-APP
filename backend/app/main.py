@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
-from app.api.routes import auth, dashboard, followups, leads
+from app.api.routes import auth, dashboard, followups, leads, subscriptions
 from app.core.config import settings
 from app.core.database import ensure_runtime_schema
 from app.models import FollowUp, Lead, LeadInteraction, Subscription, User
@@ -28,6 +28,7 @@ app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(leads.router, prefix=settings.api_prefix)
 app.include_router(followups.router, prefix=settings.api_prefix)
 app.include_router(dashboard.router, prefix=settings.api_prefix)
+app.include_router(subscriptions.router, prefix=settings.api_prefix)
 
 
 @app.get("/health")

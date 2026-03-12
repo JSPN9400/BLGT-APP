@@ -101,15 +101,17 @@ For temporary client review, this is the closest option to a real web app withou
 - `POST /api/auth/login`
 - `GET /api/auth/me`
 - `GET /api/dashboard/stats`
-- `GET /api/leads`
+- `GET /api/leads` (query parameters: `q`, `status`)
 - `POST /api/leads`
 - `GET /api/leads/{lead_id}`
 - `PUT /api/leads/{lead_id}`
 - `DELETE /api/leads/{lead_id}`
-- `GET /api/followups`
+- `GET /api/followups` (query parameters: `overdue`, `due_after`, `due_before`, `is_completed`)
 - `POST /api/followups`
 - `PUT /api/followups/{followup_id}`
 - `DELETE /api/followups/{followup_id}`
+- `GET /api/subscription`
+- `POST /api/subscription/upgrade`
 
 ## Notes
 

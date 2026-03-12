@@ -17,3 +17,12 @@ class FollowUp(Base):
 
     owner = relationship("User", back_populates="followups")
     lead = relationship("Lead", back_populates="followups")
+
+    @property
+    def lead_name(self) -> str | None:
+        """Convenience property so Pydantic responses can include the
+        related lead's name without the route having to manually fetch it.
+        """
+        # `lead` may be None if the object was created in isolation but
+        # most queries in the app eagerly load the relationship.
+        return self.lead.name if self.lead is not None else None

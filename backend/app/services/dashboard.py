@@ -26,6 +26,16 @@ def get_dashboard_stats(db: Session, user: User) -> DashboardStats:
         .scalar()
         or 0
     )
+    overdue_followups = (
+        db.query(func.count(FollowUp.id))
+        .filter(
+            FollowUp.user_id == user.id,
+            FollowUp.due_date < today,
+            FollowUp.is_completed.is_(False),
+        )
+        .scalar()
+        or 0
+    )
     contacted_leads = (
         db.query(func.count(Lead.id))
         .filter(Lead.user_id == user.id, Lead.status == LeadStatus.CONTACTED)
@@ -43,6 +53,7 @@ def get_dashboard_stats(db: Session, user: User) -> DashboardStats:
         leads_today=leads_today,
         total_leads=total_leads,
         followups_due_today=followups_due_today,
+        overdue_followups=overdue_followups,
         contacted_leads=contacted_leads,
         converted_leads=converted_leads,
         max_leads=FREE_PLAN_LIMIT if free else None,

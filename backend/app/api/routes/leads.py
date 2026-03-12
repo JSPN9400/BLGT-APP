@@ -1,8 +1,13 @@
-from fastapi import APIRouter, Depends, Response, status
+from __future__ import annotations
+
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Response, status, Query
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.core.database import get_db
+from app.models.lead import LeadStatus
 from app.schemas.lead import LeadCreate, LeadInteractionCreate, LeadResponse, LeadUpdate
 from app.services.leads import add_interaction, create_lead, delete_lead, get_lead_or_404, list_leads, update_lead
 
@@ -11,8 +16,13 @@ router = APIRouter(prefix="/leads", tags=["leads"])
 
 
 @router.get("", response_model=list[LeadResponse])
-def get_leads(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    return list_leads(db, current_user)
+def get_leads(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+    q: Annotated[str | None, Query(title="search", description="Substring to match against lead name")] = None,
+    status: Annotated[LeadStatus | None, Query()] = None,
+):
+    return list_leads(db, current_user, q=q, status=status)
 
 
 @router.post("", response_model=LeadResponse, status_code=status.HTTP_201_CREATED)

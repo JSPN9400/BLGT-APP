@@ -85,14 +85,18 @@ def delete_lead(db: Session, user: User, lead_id: int) -> None:
     db.commit()
 
 
-def list_leads(db: Session, user: User):
-    return (
-        db.query(Lead)
-        .options(selectinload(Lead.interactions))
-        .filter(Lead.user_id == user.id)
-        .order_by(Lead.created_at.desc())
-        .all()
-    )
+def list_leads(db: Session, user: User, *, q: str | None = None, status: LeadStatus | None = None):
+    """Return all leads belonging to ``user``.  Optional filters:
+
+    * ``q``: simple case‑insensitive substring search against the lead name
+    * ``status``: only return leads with a particular status
+    """
+    query = db.query(Lead).options(selectinload(Lead.interactions)).filter(Lead.user_id == user.id)
+    if q:
+        query = query.filter(Lead.name.ilike(f"%{q}%"))
+    if status:
+        query = query.filter(Lead.status == status)
+    return query.order_by(Lead.created_at.desc()).all()
 
 
 def add_interaction(db: Session, user: User, lead_id: int, payload: LeadInteractionCreate) -> Lead:
